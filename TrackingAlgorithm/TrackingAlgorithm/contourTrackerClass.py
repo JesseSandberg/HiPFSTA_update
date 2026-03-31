@@ -321,35 +321,35 @@ class contourTracker( object ):
 		
 	def setStartingCoordinates(self,dev_initialMembraneCoordinatesX,dev_initialMembraneCoordinatesY, \
 									dev_initialMembranNormalVectorsX,dev_initialMembranNormalVectorsY):
-		cl.enqueue_copy_buffer(self.queue,dev_initialMembraneCoordinatesX.data,self.dev_membraneCoordinatesX.data).wait() #<-
-		cl.enqueue_copy_buffer(self.queue,dev_initialMembraneCoordinatesY.data,self.dev_membraneCoordinatesY.data).wait()
-		cl.enqueue_copy_buffer(self.queue,dev_initialMembranNormalVectorsX.data,self.dev_membraneNormalVectorsX.data).wait()
-		cl.enqueue_copy_buffer(self.queue,dev_initialMembranNormalVectorsY.data,self.dev_membraneNormalVectorsY.data).wait()
+		cl.enqueue_copy(self.queue, self.dev_membraneCoordinatesX.data, dev_initialMembraneCoordinatesX.data).wait() #<-
+		cl.enqueue_copy(self.queue, self.dev_membraneCoordinatesY.data, dev_initialMembraneCoordinatesY.data).wait()
+		cl.enqueue_copy(self.queue, self.dev_membraneNormalVectorsX.data, dev_initialMembranNormalVectorsX.data).wait()
+		cl.enqueue_copy(self.queue, self.dev_membraneNormalVectorsY.data, dev_initialMembranNormalVectorsY.data).wait()
 		barrierEvent = cl.enqueue_barrier(self.queue)
 		self.queue.finish()
 		
 	def setStartingCoordinatesNew(self,dev_initialMembraneCoordinatesX,dev_initialMembraneCoordinatesY):
-		cl.enqueue_copy_buffer(self.queue,dev_initialMembraneCoordinatesX.data,self.dev_membraneCoordinatesX.data).wait() #<-
-		cl.enqueue_copy_buffer(self.queue,dev_initialMembraneCoordinatesY.data,self.dev_membraneCoordinatesY.data).wait()
+		cl.enqueue_copy(self.queue, self.dev_membraneCoordinatesX.data, dev_initialMembraneCoordinatesX.data).wait() #<-
+		cl.enqueue_copy(self.queue, self.dev_membraneCoordinatesY.data, dev_initialMembraneCoordinatesY.data).wait()
 		
 		#cl.enqueue_copy_buffer(self.queue,dev_initialMembraneCoordinatesX.data,self.dev_interpolatedMembraneCoordinatesX.data).wait()
 		#cl.enqueue_copy_buffer(self.queue,dev_initialMembraneCoordinatesY.data,self.dev_interpolatedMembraneCoordinatesY.data).wait()
 
-		cl.enqueue_copy_buffer(self.queue,dev_initialMembraneCoordinatesX.data,self.dev_previousInterpolatedMembraneCoordinatesX.data).wait()
-		cl.enqueue_copy_buffer(self.queue,dev_initialMembraneCoordinatesY.data,self.dev_previousInterpolatedMembraneCoordinatesY.data).wait()
+		cl.enqueue_copy(self.queue, self.dev_previousInterpolatedMembraneCoordinatesX.data, dev_initialMembraneCoordinatesX.data).wait()
+		cl.enqueue_copy(self.queue, self.dev_previousInterpolatedMembraneCoordinatesY.data, dev_initialMembraneCoordinatesY.data).wait()
 		barrierEvent = cl.enqueue_barrier(self.queue)
 		
 	def setContourCenter(self,dev_initialContourCenter):
-		cl.enqueue_copy_buffer(self.queue,dev_initialContourCenter.data,self.dev_previousContourCenter.data).wait()
+		cl.enqueue_copy(self.queue, self.dev_previousContourCenter.data, dev_initialContourCenter.data).wait()
 		pass
 
 	def setStartingMembraneNormals(self,dev_initialMembranNormalVectorsX,dev_initialMembranNormalVectorsY):
 		if self.resetNormalsAfterEachImage and not self.getContourId()==0: # reset contour normal vector to radial vectors; we do this only starting for the second, since doing this for image 0, would destroy the correspondence of the indexes of the contour coordinates to their corresponding contour normals
-			cl.enqueue_copy_buffer(self.queue,self.dev_radialVectorsX.data,self.dev_membraneNormalVectorsX.data).wait()
-			cl.enqueue_copy_buffer(self.queue,self.dev_radialVectorsY.data,self.dev_membraneNormalVectorsY.data).wait()
+			cl.enqueue_copy(self.queue, self.dev_membraneNormalVectorsX.data, self.dev_radialVectorsX.data).wait()
+			cl.enqueue_copy(self.queue, self.dev_membraneNormalVectorsY.data, self.dev_radialVectorsY.data).wait()
 		else: # copy contour normal vectors from last image to use as initial normal vectors for next image
-			cl.enqueue_copy_buffer(self.queue,dev_initialMembranNormalVectorsX.data,self.dev_membraneNormalVectorsX.data).wait()
-			cl.enqueue_copy_buffer(self.queue,dev_initialMembranNormalVectorsY.data,self.dev_membraneNormalVectorsY.data).wait()
+			cl.enqueue_copy(self.queue, self.dev_membraneNormalVectorsX.data, dev_initialMembranNormalVectorsX.data).wait()
+			cl.enqueue_copy(self.queue, self.dev_membraneNormalVectorsY.data, dev_initialMembranNormalVectorsY.data).wait()
 		barrierEvent = cl.enqueue_barrier(self.queue)
 		
 	def getNrOfTrackingIterations(self):
@@ -472,11 +472,11 @@ class contourTracker( object ):
 		self.dev_membraneCoordinatesX, self.dev_membraneCoordinatesY = helpers.ToSingleVectorsOnDevice(self.queue,self.dev_membraneCoordinates)
 		self.dev_membraneNormalVectorsX, self.dev_membraneNormalVectorsY = helpers.ToSingleVectorsOnDevice(self.queue,self.dev_membraneNormalVectors)
 
-		cl.enqueue_copy_buffer(self.queue,self.dev_membraneCoordinatesX.data,self.dev_interpolatedMembraneCoordinatesX.data).wait()
-		cl.enqueue_copy_buffer(self.queue,self.dev_membraneCoordinatesY.data,self.dev_interpolatedMembraneCoordinatesY.data).wait()
+		cl.enqueue_copy(self.queue, self.dev_interpolatedMembraneCoordinatesX.data, self.dev_membraneCoordinatesX.data).wait()
+		cl.enqueue_copy(self.queue, self.dev_interpolatedMembraneCoordinatesY.data, self.dev_membraneCoordinatesY.data).wait()
 
-		cl.enqueue_copy_buffer(self.queue,self.dev_membraneCoordinatesX.data,self.dev_previousInterpolatedMembraneCoordinatesX.data).wait()
-		cl.enqueue_copy_buffer(self.queue,self.dev_membraneCoordinatesY.data,self.dev_previousInterpolatedMembraneCoordinatesY.data).wait()
+		cl.enqueue_copy(self.queue, self.dev_previousInterpolatedMembraneCoordinatesX.data, self.dev_membraneCoordinatesX.data).wait()
+		cl.enqueue_copy(self.queue, self.dev_previousInterpolatedMembraneCoordinatesY.data, self.dev_membraneCoordinatesY.data).wait()
 		
 		self.setStartingCoordinatesNew(self.dev_interpolatedMembraneCoordinatesX, \
 									   self.dev_interpolatedMembraneCoordinatesY)
@@ -484,8 +484,8 @@ class contourTracker( object ):
 
 	def trackContour(self):
 		if self.resetNormalsAfterEachImage and not self.getContourId()==0 and self.nrOfTrackingIterations==0: # reset contour normal vector to radial vectors; we do this only starting for the second, since doing this for image 0, would destroy the correspondence of the indexes of the contour coordinates to their corresponding contour normals
-			cl.enqueue_copy_buffer(self.queue,self.dev_radialVectorsX.data,self.dev_membraneNormalVectorsX.data).wait()
-			cl.enqueue_copy_buffer(self.queue,self.dev_radialVectorsY.data,self.dev_membraneNormalVectorsY.data).wait()
+			cl.enqueue_copy(self.queue, self.dev_membraneNormalVectorsX.data, self.dev_radialVectorsX.data).wait()
+			cl.enqueue_copy(self.queue, self.dev_membraneNormalVectorsY.data, self.dev_radialVectorsY.data).wait()
 
 		# tracking status variables
 		self.nrOfTrackingIterations = self.nrOfTrackingIterations + 1
@@ -627,9 +627,9 @@ class contourTracker( object ):
 
 		barrierEvent = cl.enqueue_barrier(self.queue)
 
-		cl.enqueue_copy_buffer(self.queue,self.dev_interpolatedMembraneCoordinatesX.data,self.dev_previousInterpolatedMembraneCoordinatesX.data).wait()
-		cl.enqueue_copy_buffer(self.queue,self.dev_interpolatedMembraneCoordinatesY.data,self.dev_previousInterpolatedMembraneCoordinatesY.data).wait()
-		cl.enqueue_copy_buffer(self.queue,self.dev_contourCenter.data,self.dev_previousContourCenter.data).wait()
+		cl.enqueue_copy(self.queue, self.dev_previousInterpolatedMembraneCoordinatesX.data, self.dev_interpolatedMembraneCoordinatesX.data).wait()
+		cl.enqueue_copy(self.queue, self.dev_previousInterpolatedMembraneCoordinatesY.data, self.dev_interpolatedMembraneCoordinatesY.data).wait()
+		cl.enqueue_copy(self.queue, self.dev_previousContourCenter.data, self.dev_contourCenter.data).wait()
 
 		self.prg.setIterationFinished(self.queue, (1,1), None, self.dev_iterationFinished.data)
 		barrierEvent = cl.enqueue_barrier(self.queue)
