@@ -366,13 +366,13 @@ class contourTracker( object ):
 		return currentTime - self.startingTime
 		
 	def plotCurrentMembraneCoordinates(self):
-		cl.enqueue_read_buffer(self.queue, self.dev_membraneCoordinatesX.data, self.host_membraneCoordinatesX).wait()
-		cl.enqueue_read_buffer(self.queue, self.dev_membraneCoordinatesY.data, self.host_membraneCoordinatesY).wait()
+		cl.enqueue_copy(self.queue, self.host_membraneCoordinatesX, self.dev_membraneCoordinatesX.data).wait()
+		cl.enqueue_copy(self.queue, self.host_membraneCoordinatesY, self.dev_membraneCoordinatesY.data).wait()
 		plt.plot(self.host_membraneCoordinatesX,self.host_membraneCoordinatesY)
 
 	def plotCurrentInterpolatedMembraneCoordinates(self):
-		cl.enqueue_read_buffer(self.queue, self.dev_interpolatedMembraneCoordinatesX.data, self.host_interpolatedMembraneCoordinatesX).wait()
-		cl.enqueue_read_buffer(self.queue, self.dev_interpolatedMembraneCoordinatesY.data, self.host_interpolatedMembraneCoordinatesY).wait()
+		cl.enqueue_copy(self.queue, self.host_interpolatedMembraneCoordinatesX, self.dev_interpolatedMembraneCoordinatesX.data).wait()
+		cl.enqueue_copy(self.queue, self.host_interpolatedMembraneCoordinatesY, self.dev_interpolatedMembraneCoordinatesY.data).wait()
 		plt.plot(self.host_interpolatedMembraneCoordinatesX,self.host_interpolatedMembraneCoordinatesY)
 
 	def saveDeviceVariable(self,variableName,path):
@@ -429,11 +429,11 @@ class contourTracker( object ):
 			self.dev_membraneCoordinatesX, self.dev_membraneCoordinatesY = helpers.ToSingleVectorsOnDevice(self.queue,self.dev_membraneCoordinates)
 			self.dev_membraneNormalVectorsX, self.dev_membraneNormalVectorsY = helpers.ToSingleVectorsOnDevice(self.queue,self.dev_membraneNormalVectors)
 			
-			cl.enqueue_read_buffer(self.queue, self.dev_membraneCoordinatesX.data, self.host_membraneCoordinatesX).wait()
-			cl.enqueue_read_buffer(self.queue, self.dev_membraneCoordinatesY.data, self.host_membraneCoordinatesY).wait()
+			cl.enqueue_copy(self.queue, self.host_membraneCoordinatesX, self.dev_membraneCoordinatesX.data).wait()
+			cl.enqueue_copy(self.queue, self.host_membraneCoordinatesY, self.dev_membraneCoordinatesY.data).wait()
 
-			cl.enqueue_read_buffer(self.queue, self.dev_membraneNormalVectorsX.data, self.host_membraneNormalVectorsX).wait()
-			cl.enqueue_read_buffer(self.queue, self.dev_membraneNormalVectorsY.data, self.host_membraneNormalVectorsY).wait()
+			cl.enqueue_copy(self.queue, self.host_membraneNormalVectorsX, self.dev_membraneNormalVectorsX.data).wait()
+			cl.enqueue_copy(self.queue, self.host_membraneNormalVectorsY, self.dev_membraneNormalVectorsY.data).wait()
 
 			currentMembraneCoordinate = np.array([self.host_membraneCoordinatesX[coordinateIndex],self.host_membraneCoordinatesY[coordinateIndex]])
 			
@@ -623,7 +623,7 @@ class contourTracker( object ):
 		self.dev_membranePolarTheta, self.dev_membranePolarRadius = helpers.ToSingleVectorsOnDevice(self.queue,self.dev_membranePolarCoordinates)
 		self.dev_interpolatedMembraneCoordinatesX, self.dev_interpolatedMembraneCoordinatesY = helpers.ToSingleVectorsOnDevice(self.queue,self.dev_interpolatedMembraneCoordinates)
 
-		cl.enqueue_read_buffer(self.queue, self.dev_trackingFinished.data, self.trackingFinished).wait()
+		cl.enqueue_copy(self.queue, self.trackingFinished, self.dev_trackingFinished.data).wait()
 
 		barrierEvent = cl.enqueue_barrier(self.queue)
 
@@ -634,7 +634,7 @@ class contourTracker( object ):
 		self.prg.setIterationFinished(self.queue, (1,1), None, self.dev_iterationFinished.data)
 		barrierEvent = cl.enqueue_barrier(self.queue)
 
-		cl.enqueue_read_buffer(self.queue, self.dev_iterationFinished.data, self.iterationFinished).wait()
+		cl.enqueue_copy(self.queue, self.iterationFinished, self.dev_iterationFinished.data).wait()
 
 		self.setStartingCoordinatesNew(self.dev_interpolatedMembraneCoordinatesX, \
 									   self.dev_interpolatedMembraneCoordinatesY)
@@ -669,44 +669,44 @@ class contourTracker( object ):
 		pass
 		
 	def getMembraneCoordinatesX(self):
-		cl.enqueue_read_buffer(self.queue, self.dev_interpolatedMembraneCoordinatesX.data, self.host_interpolatedMembraneCoordinatesX).wait()
+		cl.enqueue_copy(self.queue, self.host_interpolatedMembraneCoordinatesX, self.dev_interpolatedMembraneCoordinatesX.data).wait()
 		return self.host_interpolatedMembraneCoordinatesX/self.configReader.scalingFactor
 		pass
 	
 	def getMembraneCoordinatesY(self):
-		cl.enqueue_read_buffer(self.queue, self.dev_interpolatedMembraneCoordinatesY.data, self.host_interpolatedMembraneCoordinatesY).wait()
+		cl.enqueue_copy(self.queue, self.host_interpolatedMembraneCoordinatesY, self.dev_interpolatedMembraneCoordinatesY.data).wait()
 		return self.host_interpolatedMembraneCoordinatesY/self.configReader.scalingFactor
 		pass
 
 	def getMembraneCoordinatesXscaled(self):
-		cl.enqueue_read_buffer(self.queue, self.dev_interpolatedMembraneCoordinatesX.data, self.host_interpolatedMembraneCoordinatesX).wait()
+		cl.enqueue_copy(self.queue, self.host_interpolatedMembraneCoordinatesX, self.dev_interpolatedMembraneCoordinatesX.data).wait()
 		return self.host_interpolatedMembraneCoordinatesX
 		pass
 	
 	def getMembraneCoordinatesYscaled(self):
-		cl.enqueue_read_buffer(self.queue, self.dev_interpolatedMembraneCoordinatesY.data, self.host_interpolatedMembraneCoordinatesY).wait()
+		cl.enqueue_copy(self.queue, self.host_interpolatedMembraneCoordinatesY, self.dev_interpolatedMembraneCoordinatesY.data).wait()
 		return self.host_interpolatedMembraneCoordinatesY
 		pass
 
 	def getMembraneNormalVectorsX(self):
-		cl.enqueue_read_buffer(self.queue, self.dev_membraneNormalVectorsX.data, self.host_membraneNormalVectorsX).wait()
+		cl.enqueue_copy(self.queue, self.host_membraneNormalVectorsX, self.dev_membraneNormalVectorsX.data).wait()
 		return self.host_membraneNormalVectorsX
 		pass
 
 	def getMembraneNormalVectorsY(self):
-		cl.enqueue_read_buffer(self.queue,self.dev_membraneNormalVectorsY.data,self.host_membraneNormalVectorsY).wait()
+		cl.enqueue_copy(self.queue, self.host_membraneNormalVectorsY, self.dev_membraneNormalVectorsY.data).wait()
 		return self.host_membraneNormalVectorsY
 		pass
 
 	def getContourCenterCoordinates(self):
-		cl.enqueue_read_buffer(self.queue, self.dev_contourCenter.data, self.host_contourCenter).wait()
+		cl.enqueue_copy(self.queue, self.host_contourCenter, self.dev_contourCenter.data).wait()
 		self.host_contourCenter[0]['x']=self.host_contourCenter[0]['x']/self.configReader.scalingFactor
 		self.host_contourCenter[0]['y']=self.host_contourCenter[0]['y']/self.configReader.scalingFactor
 		return self.host_contourCenter
 		pass
 
 	def getFitInclines(self):
-		cl.enqueue_read_buffer(self.queue, self.dev_fitInclines.data, self.host_fitInclines).wait()
+		cl.enqueue_copy(self.queue, self.host_fitInclines, self.dev_fitInclines.data).wait()
 		return self.host_fitInclines * self.configReader.scalingFactor # needs to be multiplied, since putting in more pixels artificially reduces the value of the incline
 		pass
 
